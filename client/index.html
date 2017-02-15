@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script src="build/js/bundle.js"></script>
+		<script src="https://dl.frontapp.com/libs/frontjs.min.js"></script>
+	</head>
+	<body style="font-family:Helvetica Neue"ng-app="FrontTestIntegration" ng-controller="FrontTestController">
+		<h1>Front-Github Test Integration</h1>
+		<h2>Open issues for node-stomp-client:</h2>
+	    <div ng-repeat="issue in issues">
+	    	<a ng-href="{{issue.html_url}}"><h4>{{$index}}.) {{issue.title}}</h4></a>
+	    	<ul>
+	    		<li><button ng-click="issue.showDescription=!issue.showDescription">{{issue.showDescription ? 'hide' : 'show'}} description for this issue</button></li>
+	    		<li ng-show="issue.showDescription">{{issue.body}}</li>
+	    		<button ng-show="issue.showDescription" ng-click="draftMessageWithComment(issue.body)"><i>draft a message with this issue description...</i></button>
+	    		<li><button ng-click="fetchComments(issue.comments_url, issue)">fetch comments for issue</button></li>
+	    		<li ng-show="issue.noCommentsFound">No comments found.</li>
+	    		<ol ng-show="issue.fetchedComments&&issue.fetchedComments.length">
+	    			<li ng-repeat="comment in issue.fetchedComments">"{{comment.body}}"
+	    				<button ng-click="draftMessageWithComment(comment.body)"><i>draft a message with this comment...</i></button>
+	    			</li>
+	    		</ol>
+	    	</ul>
+	    </div>
+	</body>
+</html>
