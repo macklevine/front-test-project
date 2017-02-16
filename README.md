@@ -5,6 +5,7 @@
 ```
 npm install
 bower install
-gulp dev
-ngrok http 3000
+gulp
+cd [~/Downloads/path-to-ngrok]
+./ngrok http 3000
 ```
