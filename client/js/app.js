@@ -1,10 +1,38 @@
-angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$scope', 'FrontTestService', function($scope, FrontTestService){
+angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$scope', '$interval', 'FrontTestService', function($scope, $interval, FrontTestService){
 	$scope.issues = [];
 	FrontTestService.getGithubDetails()
 		.then(function(response){
 			$scope.issues = response.data;
 			console.log($scope.issues);
 		});
+	$scope.monitorCommentsForIssue = function(issue){
+		console.log(issue);
+		if(!FrontTestService.timers[issue.id] || !FrontTestService.timers[issue.id].active){
+			console.log('monitoring comments triggered for: ' + issue.id);
+			FrontTestService.timers[issue.id] = $interval(function(){
+				console.log(issue.url);
+				FrontTestService.getGithubCommentsForIssue(issue.url)
+					.then(function(response){
+						console.log(response.data);
+						if(!issue.fetchedComments){
+							issue.fetchedComments = response.data;
+						}
+						// if(response.data.length > issue.fetchedComments.length){
+						// 	for (var i = issue.fetchedComments.)
+						// }
+						// issue.fetchedComments = response.data;
+					});
+				console.log('monitoring issue: ' + issue.id);
+			}, 1000);
+			FrontTestService.timers[issue.id].active = true;
+			issue.monitoringEnabled = true;
+		} else {
+			console.log('monitoring comments cancelled for: ' + issue.id);
+			$interval.cancel(FrontTestService.timers[issue.id]);
+			FrontTestService.timers[issue.id].active = false;
+			issue.monitoringEnabled = false;
+		}
+	};
 	$scope.fetchComments = function(url, issue){
 		if(issue.comments === 0){
 			issue.noCommentsFound = true;
@@ -34,10 +62,10 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 	this.getGithubDetails = function getGithubDetails(){
 		//GET /repos/:owner/:repo/issues
 		var githubBaseUri = 'https://api.github.com';
-		//https://github.com/easternbloc/node-stomp-client
-		return $http.get(githubBaseUri + '/repos/easternbloc/node-stomp-client/issues');
+		return $http.get(githubBaseUri + '/repos/macklevine/front-test-project/issues');
 	};
 	this.getGithubCommentsForIssue = function getGithubCommentsForIssue(url){
 		return $http.get(url);
-	}
+	};
+	this.timers = {};
 }]);
