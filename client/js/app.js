@@ -11,19 +11,22 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 			console.log('monitoring comments triggered for: ' + issue.id);
 			FrontTestService.timers[issue.id] = $interval(function(){
 				console.log(issue.url);
-				FrontTestService.getGithubCommentsForIssue(issue.url)
+				FrontTestService.getGithubCommentsForIssue(issue.comments_url)
 					.then(function(response){
 						console.log(response.data);
+						issue.comments = response.data.length;
 						if(!issue.fetchedComments){
 							issue.fetchedComments = response.data;
-						}
-						// if(response.data.length > issue.fetchedComments.length){
-						// 	for (var i = issue.fetchedComments.)
-						// }
-						// issue.fetchedComments = response.data;
+						} else {
+							if(response.data.length > issue.fetchedComments.length){
+								for (var i = issue.fetchedComments.length; i < response.data.length; i++){
+									issue.fetchedComments.push(response.data[i]);
+								}
+							}
+						}	
 					});
 				console.log('monitoring issue: ' + issue.id);
-			}, 1000);
+			}, 5000);
 			FrontTestService.timers[issue.id].active = true;
 			issue.monitoringEnabled = true;
 		} else {
@@ -33,30 +36,6 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 			issue.monitoringEnabled = false;
 		}
 	};
-	$scope.fetchComments = function(url, issue){
-		if(issue.comments === 0){
-			issue.noCommentsFound = true;
-		}
-		if(issue.commentsFetched)return;
-		FrontTestService.getGithubCommentsForIssue(url)
-			.then(function(response){
-				issue.fetchedComments = response.data;
-			});
-	};
-	$scope.draftMessageWithComment = function(comment){
-		if(window.Front){
-			Front.compose({
-			    from: 'mackplevine@gmail.com',
-			    to: ['mackplevine@gmail.com'],
-			    // cc: ['copy@example.com'],
-			    subject: 'Optional subject',
-			    body: comment,
-			    // tags: ['tag_alias_1', 'tag_alias_2'],
-			    attachment_uids: [],
-			    hide_composer: false
-			});
-		}
-	}
 }])
 .service('FrontTestService', ['$http', '$q', function($http, $q){
 	this.getGithubDetails = function getGithubDetails(){
@@ -64,8 +43,17 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 		var githubBaseUri = 'https://api.github.com';
 		return $http.get(githubBaseUri + '/repos/macklevine/front-test-project/issues');
 	};
+	this.createFrontConversationForissue = function(issue){
+
+	};
+	this.createFrontMessageForComment = function(comment){
+
+	};
 	this.getGithubCommentsForIssue = function getGithubCommentsForIssue(url){
 		return $http.get(url);
 	};
 	this.timers = {};
 }]);
+
+
+
