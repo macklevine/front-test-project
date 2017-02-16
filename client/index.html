@@ -5,7 +5,7 @@
 		<script src="https://dl.frontapp.com/libs/frontjs.min.js"></script>
 		<script src="https://use.fontawesome.com/a184991482.js"></script>
 	</head>
-	<body style="font-family:Helvetica Neue"ng-app="FrontTestIntegration" ng-controller="FrontTestController">
+	<body style="font-family:Helvetica Neue;background-color:white"ng-app="FrontTestIntegration" ng-controller="FrontTestController">
 		<h1 style="text-align:center">Github Plugin</h1>
 		<img src="social.gif"/>
 		<h2>Open issues for front-test-project:</h2>
@@ -13,9 +13,9 @@
 	    	<a ng-href="{{issue.html_url}}"><h4>{{$index+1}}.) {{issue.title}}</h4></a>
 	    	<ul>
 	    		<li>
-	    			<i>"{{issue.body}}"</i>
-	    				<span ng-if="issue.frontConversationCreated" style="color:green"><i class="fa fa-check"></i>Front message created for issue.</span>
-	    				<span ng-if="!comment.frontConversationCreated" style="color:orange"><i class="fa fa-close"></i>Front message not yet created for issue.</span>
+	    			<i>Issue Description: "{{issue.body}}"</i>
+	    				<span ng-if="issue.frontConversationCreated" style="color:green"><i class="fa fa-check">  </i>Front conversation created for issue. </span>
+	    				<span ng-if="!issue.frontConversationCreated" style="color:orange"><i class="fa fa-close">  </i>Creating Front conversation for issue... <img height="18px" width="18px" src="spinner.gif"/></span>
 	    		</li>
 	    		<li>
 	    			<button ng-click="monitorCommentsForIssue(issue)">{{issue.monitoringEnabled ? 'Disable monitoring' : 'Monitor'}} comments for issue?</button> <i class="fa fa-cogs" ng-style="issue.monitoringEnabled ? {color:'green'} : {color:'orange'}"></i>
@@ -25,8 +25,8 @@
 	    		<li ng-show="issue.noCommentsFound">No comments found.</li>
 	    		<ol ng-show="issue.fetchedComments&&issue.fetchedComments.length">
 	    			<li ng-repeat="comment in issue.fetchedComments">"{{comment.body}}"
-	    				<span ng-if="comment.frontMessageCreated" style="color:green"><i class="fa fa-check"></i>Front message created for comment.</span>
-	    				<span ng-if="!comment.frontMessageCreated" style="color:orange"><i class="fa fa-close"></i>Front message not yet created for comment.</span>
+	    				<span ng-if="comment.frontMessageCreated" style="color:green"><i class="fa fa-check">  </i>Front message created for comment.</span>
+	    				<span ng-if="!comment.frontMessageCreated" style="color:orange"><i class="fa fa-close">  </i>Creating Front message for comment...<img height="18px" width="18px" src="spinner.gif"/></span>
 	    			</li>
 	    		</ol>
 	    	</ul>

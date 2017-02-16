@@ -1,12 +1,19 @@
 angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$scope', '$interval', 'FrontTestService', function($scope, $interval, FrontTestService){
 	$scope.issues = [];
+	Front.fetchChannels(function (channels) {
+	    if (!channels) return;
+	    console.log(channels);
+	});
 	FrontTestService.getGithubDetails()
 		.then(function(response){
 			$scope.issues = response.data;
+			for (var i = 0; i < $scope.issues.length; i++){
+				FrontTestService.createFrontConversationForIssue($scope.issues[i]);
+			}
 			console.log($scope.issues);
 		});
 	$scope.monitorCommentsForIssue = function(issue){
-		console.log(issue);
+		//TODO: evenually replace this with github webhooks.
 		if(!FrontTestService.timers[issue.id] || !FrontTestService.timers[issue.id].active){
 			console.log('monitoring comments triggered for: ' + issue.id);
 			FrontTestService.timers[issue.id] = $interval(function(){
@@ -21,6 +28,7 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 							if(response.data.length > issue.fetchedComments.length){
 								for (var i = issue.fetchedComments.length; i < response.data.length; i++){
 									issue.fetchedComments.push(response.data[i]);
+									FrontTestService.createFrontMessageForComment(issue.fetchedComments[i]);
 								}
 							}
 						}	
@@ -38,13 +46,40 @@ angular.module('FrontTestIntegration', []).controller('FrontTestController', ['$
 	};
 }])
 .service('FrontTestService', ['$http', '$q', function($http, $q){
+	var self = this;
+	this.customChannel = '';
 	this.getGithubDetails = function getGithubDetails(){
-		//GET /repos/:owner/:repo/issues
 		var githubBaseUri = 'https://api.github.com';
 		return $http.get(githubBaseUri + '/repos/macklevine/front-test-project/issues');
 	};
-	this.createFrontConversationForissue = function(issue){
-
+	this.createFrontConversationForIssue = function(issue){
+		var composeMessage = function(){
+			console.log(self.customChannel);
+			Front.compose({
+			    from: 'github integration',
+			    to: [self.customChannel],
+			    subject: issue.title,
+			    body: issue.body,
+			    attachment_uids: [],
+			    hide_composer: false
+			});
+		};
+		if(!self.customChannel){
+			Front.fetchChannels(function (channels) {
+				for (var i = 0; i < channels.length; i++){
+					console.log(channels[i]);
+					if(channels[i].type_name==='email'){
+						self.customChannel = channels[i].send_as;
+						composeMessage();
+						issue.frontConversationCreated = true;
+						break;
+					}
+				}
+			});
+		} else {
+			issue.frontConversationCreated = true;
+			composeMessage();
+		}
 	};
 	this.createFrontMessageForComment = function(comment){
 
